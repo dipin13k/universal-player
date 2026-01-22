@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediaFlow - Universal Media Player</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+ 
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0d0d14 0%, #151525 50%, #121a2e 100%);
+            min-height: 100vh;
+            color: #f8fafc;
+        }
+ 
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+ 
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo-wrapper {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+            color: #8b5cf6;
+        }
+ 
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+ 
+        .tagline {
+            color: #64748b;
+            font-size: 1.1rem;
+        }
+ 
+        .input-section {
+            background: rgba(30, 30, 45, 0.6);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(139, 92, 246, 0.15);
+            backdrop-filter: blur(12px);
+        }
+ 
+        .input-wrapper {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+ 
+        #mediaUrl {
+            flex: 1;
+            min-width: 250px;
+            padding: 16px 20px;
+            border: 2px solid rgba(139, 92, 246, 0.2);
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.4);
+            color: #f8fafc;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+ 
+        #mediaUrl:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.3);
+        }
+ 
+        #mediaUrl::placeholder {
+            color: #475569;
+        }
+ 
+        .play-btn {
+            padding: 16px 32px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+        }
+ 
+        .play-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(139, 92, 246, 0.5);
+        }
+ 
+        .platforms {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+ 
+        .platform-badge {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            font-size: 0.85rem;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+ 
+        .platform-badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+ 
+        .youtube .dot { background: #ef4444; }
+        .spotify .dot { background: #22c55e; }
+        .soundcloud .dot { background: #f97316; }
+        .vimeo .dot { background: #06b6d4; }
+        .twitch .dot { background: #a855f7; }
+        .dailymotion .dot { background: #06b6d4; }
+ 
+        .player-section {
+            background: rgba(30, 30, 45, 0.6);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(139, 92, 246, 0.15);
+            backdrop-filter: blur(12px);
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+ 
+        .player-section.active {
+            min-height: auto;
+        }
+ 
+        .placeholder {
+            text-align: center;
+            padding: 60px 20px;
+            color: #475569;
+        }
+ 
+        .placeholder-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+ 
+        .placeholder p {
+            font-size: 1.1rem;
+        }
+ 
+        #playerContainer {
+            width: 100%;
+            display: none;
+        }
+ 
+        #playerContainer.active {
+            display: block;
+        }
+ 
+        #playerContainer iframe {
+            width: 100%;
+            border: none;
+            display: block;
+        }
+ 
+        .video-player {
+            aspect-ratio: 16/9;
+        }
+ 
+        .audio-player {
+            height: 152px;
+        }
+ 
+        .audio-player-large {
+            height: 352px;
+        }
+ 
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            display: none;
+        }
+ 
+        .error-message.show {
+            display: block;
+        }
+ 
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: #475569;
+            font-size: 0.85rem;
+        }
+ 
+        @media (max-width: 600px) {
+            .logo {
+                font-size: 2rem;
+            }
+            
+            .input-wrapper {
+                flex-direction: column;
+            }
+            
+            .play-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-wrapper">
+                <span class="logo-icon">🎵</span>
+                <h1 class="logo">MediaFlow</h1>
+            </div>
+            <p class="tagline">Play any media from any platform — just paste the link</p>
+        </header>
+ 
+        <section class="input-section">
+            <div class="input-wrapper">
+                <input 
+                    type="text" 
+                    id="mediaUrl" 
+                    placeholder="Paste YouTube, Spotify, SoundCloud, Vimeo, or any media link..."
+                    autocomplete="off"
+                >
+                <button class="play-btn" onclick="playMedia()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    Play
+                </button>
+            </div>
+            
+            <div class="platforms">
+                <span class="platform-badge youtube"><span class="dot"></span>YouTube</span>
+                <span class="platform-badge spotify"><span class="dot"></span>Spotify</span>
+                <span class="platform-badge soundcloud"><span class="dot"></span>SoundCloud</span>
+                <span class="platform-badge vimeo"><span class="dot"></span>Vimeo</span>
+                <span class="platform-badge twitch"><span class="dot"></span>Twitch</span>
+                <span class="platform-badge dailymotion"><span class="dot"></span>Dailymotion</span>
+            </div>
+ 
+            <div class="error-message" id="errorMessage"></div>
+        </section>
+ 
+        <section class="player-section" id="playerSection">
+            <div class="placeholder" id="placeholder">
+                <div class="placeholder-icon">🎬</div>
+                <p>Paste a link above to start playing</p>
+            </div>
+            <div id="playerContainer"></div>
+        </section>
+ 
+        <footer>
+            <p>Made by Dipin</p>
+        </footer>
+    </div>
+ 
+    <script>
+        const platforms = {
+            youtube: {
+                patterns: [
+                    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
+                    /youtube\.com\/playlist\?list=([a-zA-Z0-9_-]+)/
+                ],
+                getEmbed: (id, isPlaylist) => {
+                    // Try multiple YouTube embed approaches
+                    const embedUrl = isPlaylist 
+                        ? `https://www.youtube.com/embed/videoseries?list=${id}`
+                        : `https://www.youtube.com/embed/${id}`;
+                    
+                    return `<iframe class="video-player" src="${embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
+                },
+                icon: '▶'
+            },
+            spotify: {
+                patterns: [
+                    /open\.spotify\.com\/(track|album|playlist|artist|episode|show)\/([a-zA-Z0-9]+)/
+                ],
+                getEmbed: (id, type) => {
+                    const height = type === 'track' ? 152 : 352;
+                    return `<iframe class="audio-player${type !== 'track' ? '-large' : ''}" style="height: ${height}px" src="https://open.spotify.com/embed/${type}/${id}?theme=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+                },
+                icon: '🎵'
+            },
+            soundcloud: {
+                patterns: [
+                    /soundcloud\.com\/([a-zA-Z0-9-_]+\/[a-zA-Z0-9-_]+)/,
+                    /soundcloud\.com\/([a-zA-Z0-9-_]+)$/
+                ],
+                getEmbed: (url) => {
+                    const encodedUrl = encodeURIComponent(url);
+                    return `<iframe class="audio-player-large" style="height: 300px" src="https://w.soundcloud.com/player/?url=${encodedUrl}&color=%23ff5500&auto_play=true&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"></iframe>`;
+                },
+                icon: '☁',
+                useFullUrl: true
+            },
+            vimeo: {
+                patterns: [
+                    /vimeo\.com\/(\d+)/,
+                    /player\.vimeo\.com\/video\/(\d+)/
+                ],
+                getEmbed: (id) => {
+                    return `<iframe class="video-player" src="https://player.vimeo.com/video/${id}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+                },
+                icon: '▷'
+            },
+            twitch: {
+                patterns: [
+                    /twitch\.tv\/videos\/(\d+)/,
+                    /twitch\.tv\/([a-zA-Z0-9_]+)$/
+                ],
+                getEmbed: (id, isVideo) => {
+                    const parent = window.location.hostname || 'localhost';
+                    if (isVideo) {
+                        return `<iframe class="video-player" src="https://player.twitch.tv/?video=${id}&parent=${parent}" allowfullscreen></iframe>`;
+                    }
+                    return `<iframe class="video-player" src="https://player.twitch.tv/?channel=${id}&parent=${parent}" allowfullscreen></iframe>`;
+                },
+                icon: '📺'
+            },
+            dailymotion: {
+                patterns: [
+                    /dailymotion\.com\/video\/([a-zA-Z0-9]+)/,
+                    /dai\.ly\/([a-zA-Z0-9]+)/
+                ],
+                getEmbed: (id) => {
+                    return `<iframe class="video-player" src="https://www.dailymotion.com/embed/video/${id}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+                },
+                icon: '◆'
+            }
+        };
+ 
+        function detectPlatform(url) {
+            url = url.trim();
+            
+            for (const [name, platform] of Object.entries(platforms)) {
+                for (let i = 0; i < platform.patterns.length; i++) {
+                    const match = url.match(platform.patterns[i]);
+                    if (match) {
+                        return {
+                            name,
+                            platform,
+                            match,
+                            patternIndex: i,
+                            url
+                        };
+                    }
+                }
+            }
+            return null;
+        }
+ 
+        function playMedia() {
+            const urlInput = document.getElementById('mediaUrl');
+            const url = urlInput.value.trim();
+            const errorEl = document.getElementById('errorMessage');
+            const playerContainer = document.getElementById('playerContainer');
+            const placeholder = document.getElementById('placeholder');
+            const playerSection = document.getElementById('playerSection');
+ 
+            errorEl.classList.remove('show');
+            
+            if (!url) {
+                showError('Please enter a media URL');
+                return;
+            }
+ 
+            const detected = detectPlatform(url);
+            
+            if (!detected) {
+                showError('Could not detect platform. Supported: YouTube, Spotify, SoundCloud, Vimeo, Twitch, Dailymotion');
+                return;
+            }
+ 
+            let embedHtml;
+            const { name, platform, match } = detected;
+ 
+            try {
+                switch (name) {
+                    case 'youtube':
+                        const isPlaylist = url.includes('playlist');
+                        embedHtml = platform.getEmbed(match[1], isPlaylist);
+                        break;
+                    case 'spotify':
+                        embedHtml = platform.getEmbed(match[2], match[1]);
+                        break;
+                    case 'soundcloud':
+                        embedHtml = platform.getEmbed(url);
+                        break;
+                    case 'twitch':
+                        const isVideo = url.includes('/videos/');
+                        embedHtml = platform.getEmbed(match[1], isVideo);
+                        break;
+                    default:
+                        embedHtml = platform.getEmbed(match[1]);
+                }
+ 
+                placeholder.style.display = 'none';
+                playerContainer.classList.add('active');
+                playerContainer.innerHTML = embedHtml;
+                playerSection.classList.add('active');
+                
+            } catch (e) {
+                showError('Error creating player: ' + e.message);
+            }
+        }
+ 
+        function showError(message) {
+            const errorEl = document.getElementById('errorMessage');
+            errorEl.textContent = message;
+            errorEl.classList.add('show');
+        }
+ 
+        document.getElementById('mediaUrl').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                playMedia();
+            }
+        });
+    </script>
+</body>
+</html>
