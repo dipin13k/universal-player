@@ -23,6 +23,7 @@ MediaFlow takes URLs from popular platforms and embeds them in a clean, unified 
 4. Media plays in the embedded player
 
 
-**🌐 Live Demo: [https://dipin13k.github.io/universal-player/](https://dipin13k.github.io/universal-player/)**
+**🌐 Live Demo: <a href="https://dipin13k.github.io/universal-player/" target="_blank">https://dipin13k.github.io/universal-player/</a>**
+
 
 **Made by [Dipin](https://github.com/dipin13k)**
